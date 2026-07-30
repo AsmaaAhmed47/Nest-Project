@@ -2,16 +2,27 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { AuthModule } from './Auth/Auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { MailModule } from './mail/mail.module';
 import { LoggerMiddleware } from './common/Middlewares/logger.middleware';
 import { AuthController } from './Auth/Auth.controller';
+import { CategoryModule } from './category/category.module';
+import { BrandModule } from './brand/brand.module';
+import { ProductModule } from './product/product.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { CartModule } from './cart/cart.module';
+import { ReviewModule } from './review/review.module';
+import { CouponModule } from './coupon/coupon.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ 
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),ConfigModule.forRoot({ 
     envFilePath: resolve('config/dev.env'),
     isGlobal: true }),
     MongooseModule.forRootAsync({
@@ -27,7 +38,13 @@ import { AuthController } from './Auth/Auth.controller';
       inject: [ConfigService]
     }),
       AuthModule,
-      MailModule],
+      MailModule,
+      CategoryModule,
+      BrandModule,
+      ProductModule,
+      CartModule,
+      ReviewModule,
+      CouponModule],
   controllers: [AppController],
   providers: [AppService],
 })

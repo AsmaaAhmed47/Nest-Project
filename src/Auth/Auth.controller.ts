@@ -19,6 +19,8 @@ import { ConfirmEmailDto } from './DTO/confirm-emailDto';
 import { LoggingInterceptor } from 'src/common/interceptors/logging.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOption } from 'src/common/Utils/multer.utils';
+import { LoginDto } from './DTO/loginDto';
+import { TokenService } from 'src/common/services/Token.service';
 
 @Controller('auth')
 // @UsePipes(new SantizeUsernamePipe())
@@ -36,6 +38,15 @@ export class AuthController {
     };
   }
 
+  @Post('/login')
+  async login(@Body() loginDto: LoginDto) {
+    const result = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
+    return result;
+  }
+
   @Patch('/conirm-email')
   async confirmEmail(@Body() confirmEmailDto: ConfirmEmailDto) {
     await this.authService.confirmEmail(confirmEmailDto);
@@ -51,15 +62,17 @@ export class AuthController {
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ) {
-
-    const {userId}= req as any; 
-    const filePath = file.path
-    const updatedUser = await this.authService.updateProfilePic(filePath , userId)
+    const { userId } = req as any;
+    const filePath = file.path;
+    const updatedUser = await this.authService.updateProfilePic(
+      filePath,
+      userId,
+    );
 
     return {
-      success :true,
-      message : `profile pic updated successfully`,
-      user :updatedUser
-    }
+      success: true,
+      message: `profile pic updated successfully`,
+      user: updatedUser,
+    };
   }
 }

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './DTO/createUserDto';
 import { HUserDocument, User, UserModel } from 'src/DB/Models/user.model';
@@ -12,12 +13,14 @@ import { MailService } from 'src/mail/mail.service';
 import { hash } from 'src/common/Security/hash.security';
 import { ConfirmEmailDto } from './DTO/confirm-emailDto';
 import { compare } from 'src/common/Security/hash.security';
+import { TokenService } from 'src/common/services/Token.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<HUserDocument>,
     private readonly mailService: MailService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async register(createUserDto: CreateUserDto) {
@@ -46,6 +49,36 @@ export class AuthService {
     return savedUser;
   }
 
+  async login(email: string, password: string ) {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.confirmEmail) {
+      throw new UnauthorizedException('Please verify your email first');
+    }
+
+    const isMatch = await compare(password, user.password);
+
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const token = this.tokenService.generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role
+    });
+
+    return {
+      success: true,
+      message: 'Login Successfully',
+      accessToken: token,
+    };
+  }
+
   async confirmEmail(confirmEmailDto: ConfirmEmailDto) {
     const user = await this.userModel.findOne({ email: confirmEmailDto.email });
 
@@ -72,6 +105,12 @@ export class AuthService {
 
     user.confirmEmail = new Date();
     user.confirmEmailOTP = undefined;
+    await user.save();
+
+    return {
+      success: true,
+      message: 'Email confirmed successfully',
+    };
   }
 
   async updateProfilePic(filePath: string, userId: string) {
