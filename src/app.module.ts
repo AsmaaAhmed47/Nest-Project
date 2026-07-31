@@ -16,6 +16,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { CartModule } from './cart/cart.module';
 import { ReviewModule } from './review/review.module';
 import { CouponModule } from './coupon/coupon.module';
+import { OrderModule } from './order/order.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -44,7 +46,9 @@ import { CouponModule } from './coupon/coupon.module';
       ProductModule,
       CartModule,
       ReviewModule,
-      CouponModule],
+      CouponModule,
+      OrderModule,
+      CacheModule],
   controllers: [AppController],
   providers: [AppService],
 })

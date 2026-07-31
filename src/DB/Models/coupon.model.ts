@@ -1,10 +1,15 @@
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, HydrateOptions, Mongoose } from 'mongoose';
-
+import mongoose, { HydratedDocument } from 'mongoose';
+@ObjectType()
 @Schema({
   timestamps: true,
 })
 export class Coupon {
+  @Field(() => ID)
+  _id!: string;
+
+  @Field(() => String)
   @Prop({
     type: String,
     required: true,
@@ -14,6 +19,7 @@ export class Coupon {
   })
   code!: string;
 
+  @Field(() => Int)
   @Prop({
     type: Number,
     required: true,
@@ -22,12 +28,14 @@ export class Coupon {
   })
   discount!: number;
 
+  @Field(() => String)
   @Prop({
     type: Date,
     required: true,
   })
   expiredDate!: Date;
 
+  @Field(() => Int)
   @Prop({
     type: Number,
     required: true,
@@ -35,25 +43,28 @@ export class Coupon {
   })
   maxUsage!: number;
 
-    @Prop({
+  @Field(() => Int)
+  @Prop({
     type: Number,
     min: 0,
   })
   usedCound!: number;
 
+  @Field(() => [ID])
   @Prop({
-    type :[mongoose.Schema.Types.ObjectId],
-    ref:'User',
-    default:[]
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
   })
-  usedBy! :string[]
+  usedBy!: string[];
 
+  @Field(() => ID)
   @Prop({
-    type :mongoose.Schema.Types.ObjectId,
-    ref:'User',
-    required:true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   })
-  createdBy! :string
+  createdBy!: string;
 }
 
 export const CouponSchema = SchemaFactory.createForClass(Coupon);
